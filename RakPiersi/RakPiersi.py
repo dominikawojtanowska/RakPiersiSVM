@@ -9,11 +9,10 @@ from sklearn.svm import SVC, LinearSVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import LabelEncoder, StandardScaler, Normalizer
-from sklearn.covariance import EllipticEnvelope
-from sklearn.feature_selection import SelectPercentile, f_classif
+from sklearn.preprocessing import LabelEncoder, StandardScaler, Normalizer   
+from sklearn.covariance import EllipticEnvelope   #pomogła przy wyznaczaniu wartości odstających - aczkolwiek tu okazała się zbędna
+from sklearn.feature_selection import SelectPercentile, f_classif   #pomogła przy wyzanczeniu kolumn nieznaczących - przy tej liczbie danychrównież nie wpłyneła na wynik
 import matplotlib.pyplot as plt
-
 
 
 #wczytyanie naszych danych
@@ -46,8 +45,6 @@ normalizer = Normalizer()
 normalizer.transform(X_test)
 
 Y_pred = classifier.predict(X_test)
-#test["Predictions"] = Y_pred
-
 
 cm = confusion_matrix(Y_test,Y_pred)
 accuracy = float(cm.diagonal().sum())/len(Y_test)
@@ -60,7 +57,7 @@ classifierPoly = Pipeline([
 classifierPoly.fit(x, y)
 
 Y_pred = classifierPoly.predict(X_test)
-#test["Predictions"] = Y_pred
+
 
 cm = confusion_matrix(Y_test,Y_pred)
 accuracy = float(cm.diagonal().sum())/len(Y_test)
@@ -73,13 +70,38 @@ classifier2 = Pipeline([
 classifier2.fit(x, y)
 
 Y_pred = classifier2.predict(X_test)
-#test["Predictions"] = Y_pred
 
 cm = confusion_matrix(Y_test,Y_pred)
 accuracy = float(cm.diagonal().sum())/len(Y_test)
-print("\nDokładność dla liniowej klasyfikacji SVM z użyciem zawiasowej funkcji starty: ", accuracy)
+print("\nDokładność dla liniowej klasyfikacji SVM z użyciem zawiasowej funkcji straty: ", accuracy)
 
 
 
+#dla 2 cech atrybutu 9, 26 - rysowanie wykresów - wizualizacja metody SVM
 
 
+x = train.iloc[:, [9,25]].values 
+y = train.iloc[:, 1].values
+
+X_test = test.iloc[:, [9,25]].values
+Y_test = test.iloc[:, 1].values
+
+
+svc = SVC(kernel='linear', random_state = 1, C=10)
+svc.fit(x, y)
+
+Y_pred = svc.predict(X_test)
+
+cm = confusion_matrix(Y_test,Y_pred)
+accuracy = float(cm.diagonal().sum())/len(Y_test)
+print("\nDokładność dla liniowej klasyfikacji SVM według jedynie 2 parametrów równa jest: ", accuracy)
+
+
+color = ["pink" if c=='B' else "yellow" for c in Y_test]
+plt.scatter(X_test[:, 0], X_test[:, 1], c=color)
+w = svc.coef_[0]
+a = -w[0] / w[1]
+xx = np.linspace(-2.5 , 2.5) 
+yy = a * xx - (svc.intercept_[0]) / w[1]
+plt.plot(xx,yy)
+plt.show()
