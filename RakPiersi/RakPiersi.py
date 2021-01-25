@@ -5,9 +5,10 @@ import pandas as pandas
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from sklearn import linear_model
-from sklearn.svm import SVC
+from sklearn.svm import SVC, LinearSVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder, StandardScaler, Normalizer
 from sklearn.covariance import EllipticEnvelope
 from sklearn.feature_selection import SelectPercentile, f_classif
@@ -35,7 +36,7 @@ def plot_svc_decision_function(clf, ax=None):
                linestyles=['--', '-', '--'])
 
 
-#wczytsanie naszych danych
+#wczytyanie naszych danych
 data = pandas.read_table("wdbc.data", sep=",", header=None)
 data.drop([data.columns[13], data.columns[10], data.columns[11], data.columns[16], data.columns[31]], axis=1).head(2)
 
@@ -53,18 +54,16 @@ Y_test = test.iloc[:, 1].values
 normalizer = Normalizer()
 normalizer.transform(x)
 
-#outliner_detector = EllipticEnvelope(contamination=.1)
-#outliner_detector.fit_predict(x)
 
-
-classifier = SVC(kernel='linear', random_state = 1, class_weight='balanced')
+classifier = SVC(kernel='linear', random_state = 1, C=10)
 classifier.fit(x, y)
 
+normalizer = Normalizer()
+normalizer.transform(X_test)
 
 Y_pred = classifier.predict(X_test)
 test["Predictions"] = Y_pred
 
-print(test)
 
 cm = confusion_matrix(Y_test,Y_pred)
 accuracy = float(cm.diagonal().sum())/len(Y_test)
@@ -72,8 +71,37 @@ print("\nAccuracy Of SVM For The Given Dataset : ", accuracy)
 
 
 
+classifierPoly = Pipeline([
+    ("scaler", StandardScaler()), ("svm,clf",SVC(kernel="poly", C=13))])
+classifierPoly.fit(x, y)
+
+Y_pred = classifierPoly.predict(X_test)
+test["Predictions"] = Y_pred
+
+cm = confusion_matrix(Y_test,Y_pred)
+accuracy = float(cm.diagonal().sum())/len(Y_test)
+print("\nAccuracy Of SVM For The Given Dataset9999999 : ", accuracy)
 
 
 
-plt.scatter(x[:, 17], x[:, 24], c=y, s=50, cmap='spring')
-plot_svc_decision_function(classifier);
+classifier2 = Pipeline([
+    ("scaler", StandardScaler()), ("linear_svc", LinearSVC(C=5, loss="hinge"))])
+classifier2.fit(x, y)
+
+Y_pred = classifier2.predict(X_test)
+test["Predictions"] = Y_pred
+
+cm = confusion_matrix(Y_test,Y_pred)
+accuracy = float(cm.diagonal().sum())/len(Y_test)
+print("\nAccuracy Of SVM For The Given Dataset22222 : ", accuracy)
+
+
+targets = np.copy(y)
+for i in range(targets.size):
+    if targets[i] == 'M':
+        targets[i]=1
+    else:
+        targets[i]=2
+
+
+plt.scatter(x[:, 17], x[:,24], c=targets, s=50, cmap='spring')
