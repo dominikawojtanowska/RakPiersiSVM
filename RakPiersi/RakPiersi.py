@@ -21,6 +21,8 @@ data = pandas.read_table("wdbc.data", sep=",", header=None)
 data.drop([data.columns[13], data.columns[10], data.columns[11], data.columns[16], data.columns[31]], axis=1).head(2)
 
 
+
+#podział zbiorów
 y = data.iloc[:, 1].values
 train, test = train_test_split(data, test_size = 0.25, random_state = 1, stratify=y)
 
@@ -31,6 +33,8 @@ y = train.iloc[:, 1].values
 X_test = test.iloc[:, 2:].values
 Y_test = test.iloc[:, 1].values
 
+
+#normalizacja
 normalizer = Normalizer()
 normalizer.transform(x)
 
@@ -76,12 +80,6 @@ accuracy = float(cm.diagonal().sum())/len(Y_test)
 print("\nDokładność dla liniowej klasyfikacji SVM z użyciem zawiasowej funkcji starty: ", accuracy)
 
 
-targets = np.copy(y)
-for i in range(targets.size):
-    if targets[i] == 'M':
-        targets[i]=1
-    else:
-        targets[i]=2
 
 
 
