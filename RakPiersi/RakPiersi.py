@@ -19,12 +19,8 @@ import matplotlib.pyplot as plt
 data = pandas.read_table("wdbc.data", sep=",", header=None)
 data.drop([data.columns[13], data.columns[10], data.columns[11], data.columns[16], data.columns[31]], axis=1).head(2)
 
-
-
-#podział zbiorów
 y = data.iloc[:, 1].values
 train, test = train_test_split(data, test_size = 0.25, random_state = 1, stratify=y)
-
 
 x = train.iloc[:, 2:].values 
 y = train.iloc[:, 1].values
@@ -36,46 +32,31 @@ Y_test = test.iloc[:, 1].values
 #normalizacja
 normalizer = Normalizer()
 normalizer.transform(x)
-
+normalizer.transform(X_test)
 
 classifier = SVC(kernel='linear', random_state = 1, C=10)
 classifier.fit(x, y)
-
-normalizer = Normalizer()
-normalizer.transform(X_test)
-
 Y_pred = classifier.predict(X_test)
-
 cm = confusion_matrix(Y_test,Y_pred)
 accuracy = float(cm.diagonal().sum())/len(Y_test)
-print("\nDokładność dla liniowej klasyfikacji SVM: ", accuracy)
-
-
+print("\nAccuracy Of SVM with C=10 For The Given Dataset : ", accuracy)
 
 classifierPoly = Pipeline([
     ("scaler", StandardScaler()), ("svm,clf",SVC(kernel="poly", C=13))])
 classifierPoly.fit(x, y)
-
 Y_pred = classifierPoly.predict(X_test)
-
-
 cm = confusion_matrix(Y_test,Y_pred)
 accuracy = float(cm.diagonal().sum())/len(Y_test)
-print("\nDokładność dla nieliniowej klasyfikacji SVM: ", accuracy)
-
+print("\nAccuracy Of SVM For The Given Dataset karnel=poly: ", accuracy)
 
 
 classifier2 = Pipeline([
     ("scaler", StandardScaler()), ("linear_svc", LinearSVC(C=5, loss="hinge"))])
 classifier2.fit(x, y)
-
 Y_pred = classifier2.predict(X_test)
-
 cm = confusion_matrix(Y_test,Y_pred)
 accuracy = float(cm.diagonal().sum())/len(Y_test)
-print("\nDokładność dla liniowej klasyfikacji SVM z użyciem zawiasowej funkcji straty: ", accuracy)
-
-
+print("\nAccuracy Of LinearSVC(C=5, loss=hinge): ", accuracy)
 
 #dla 2 cech atrybutu 9, 26 - rysowanie wykresów - wizualizacja metody SVM
 
@@ -95,7 +76,6 @@ Y_pred = svc.predict(X_test)
 cm = confusion_matrix(Y_test,Y_pred)
 accuracy = float(cm.diagonal().sum())/len(Y_test)
 print("\nDokładność dla liniowej klasyfikacji SVM według jedynie 2 parametrów równa jest: ", accuracy)
-
 
 color = ["pink" if c=='B' else "yellow" for c in Y_test]
 plt.scatter(X_test[:, 0], X_test[:, 1], c=color)
