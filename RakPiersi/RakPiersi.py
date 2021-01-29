@@ -9,31 +9,10 @@ from sklearn.svm import SVC, LinearSVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import LabelEncoder, StandardScaler, Normalizer
-from sklearn.covariance import EllipticEnvelope
-from sklearn.feature_selection import SelectPercentile, f_classif
+from sklearn.preprocessing import LabelEncoder, StandardScaler, Normalizer   
+from sklearn.covariance import EllipticEnvelope   #pomogła przy wyznaczaniu wartości odstających - aczkolwiek tu okazała się zbędna
+from sklearn.feature_selection import SelectPercentile, f_classif   #pomogła przy wyzanczeniu kolumn nieznaczących - przy tej liczbie danychrównież nie wpłyneła na wynik
 import matplotlib.pyplot as plt
-
-
-def plot_svc_decision_function(clf, ax=None):
-    """Plot the decision function for a 2D SVC"""
-
-    if ax is None:
-        ax = plt.gca()
-
-    x = np.linspace(plt.xlim()[0], plt.xlim()[1], 30)
-    y = np.linspace(plt.ylim()[0], plt.ylim()[1], 30)
-    Y, X = np.meshgrid(y, x)
-    P = np.zeros_like(X)
-
-    for i, xi in enumerate(x):
-        for j, yj in enumerate(y):
-            P[i, j] = clf.decision_function([xi, yj])
-
-    # plot the margins
-    ax.contour(X, Y, P, colors='k',
-               levels=[-1, 0, 1], alpha=0.5,
-               linestyles=['--', '-', '--'])
 
 
 #wczytyanie naszych danych
@@ -49,6 +28,8 @@ y = train.iloc[:, 1].values
 X_test = test.iloc[:, 2:].values
 Y_test = test.iloc[:, 1].values
 
+
+#normalizacja
 normalizer = Normalizer()
 normalizer.transform(x)
 normalizer.transform(X_test)
@@ -68,6 +49,7 @@ cm = confusion_matrix(Y_test,Y_pred)
 accuracy = float(cm.diagonal().sum())/len(Y_test)
 print("\nAccuracy Of SVM For The Given Dataset karnel=poly: ", accuracy)
 
+
 classifier2 = Pipeline([
     ("scaler", StandardScaler()), ("linear_svc", LinearSVC(C=5, loss="hinge"))])
 classifier2.fit(x, y)
@@ -76,11 +58,30 @@ cm = confusion_matrix(Y_test,Y_pred)
 accuracy = float(cm.diagonal().sum())/len(Y_test)
 print("\nAccuracy Of LinearSVC(C=5, loss=hinge): ", accuracy)
 
-targets = np.copy(y)
-for i in range(targets.size):
-    if targets[i] == 'M':
-        targets[i]=1
-    else:
-        targets[i]=2
+#dla 2 cech atrybutu 9, 26 - rysowanie wykresów - wizualizacja metody SVM
 
-plt.scatter(x[:, 17], x[:,24], c=targets, s=50, cmap='spring')
+
+x = train.iloc[:, [9,25]].values 
+y = train.iloc[:, 1].values
+
+X_test = test.iloc[:, [9,25]].values
+Y_test = test.iloc[:, 1].values
+
+
+svc = SVC(kernel='linear', random_state = 1, C=10)
+svc.fit(x, y)
+
+Y_pred = svc.predict(X_test)
+
+cm = confusion_matrix(Y_test,Y_pred)
+accuracy = float(cm.diagonal().sum())/len(Y_test)
+print("\nDokładność dla liniowej klasyfikacji SVM według jedynie 2 parametrów równa jest: ", accuracy)
+
+color = ["pink" if c=='B' else "yellow" for c in Y_test]
+plt.scatter(X_test[:, 0], X_test[:, 1], c=color)
+w = svc.coef_[0]
+a = -w[0] / w[1]
+xx = np.linspace(-2.5 , 2.5) 
+yy = a * xx - (svc.intercept_[0]) / w[1]
+plt.plot(xx,yy)
+plt.show()
